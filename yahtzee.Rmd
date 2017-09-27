@@ -70,31 +70,35 @@ x
 ```
 We will need to sort this. The following function is called a *Bubble Sort*. Comment on every part of the code to explain what it is doing:
 
-```
-bubble_sort = function(vec) {
-    no_passes = 0
-    while(1) {
-        no_swaps = 0
-        for (j in 1 : (length(vec) - 1 - no_passes)) {
-            if (vec[j] > vec[j + 1]) {
-                s = vec[j]
-                vec[j] = vec[j+1]
-                vec[j+1] = s
-                no_swaps = no_swaps + 1
-            }
-        }
-        no_passes = no_passes + 1
-        if(no_swaps == 0) break
-    }
-    vec
+```{r}
+bubblesort <- function(x) {
+# x is initially the input vector and will be
+# modified to form the output
+if (length(x) < 2) return (x)
+# last is the last element to compare with
+for(last in length(x):2) {
+for(first in 1:(last - 1)) {
+if(x[first] > x[first + 1]) { # swap the pair
+save <- x[first]
+x[first] <- x[first + 1]
+x[first + 1] <- save
 }
+}
+}
+return (x)
+}
+
 ```
 
 ### Problem 3: Applying the Sort with dice rolls
 
 Apply Bubble sort to each row of your matrix to sort the data. (You may wish to do this within your loop so the rows are sorted as they get added.) 
+```{r}
+for(rows.i in 1:nrow(x)){
+  x[rows.i,] <- bubblesort(x[rows.i,])
+}
 
-
+```
 
 ### Problem 4: Looking for Yahtzee Combinations
 
@@ -126,19 +130,24 @@ These would all be correctly identified.  But what about:
 
 As you can see, these would all fulfill the first and third conditions proposed above, but they should be classified as Full House.  Therefore  we also need to check for a Full House in these cases.  The following identification routine checks for these types of Hands. At each stage, we have to be very careful that all possibilities are accounted for.
 
-```
-x <- bubble_sort(sample(1:6, size=5, replace=T))
+```{r}
+x <- bubblesort(sample(1:6, size=5, replace=T))
 
-if (x[1]=x[5]){
+if (x[1]==x[5]){
   hand="Yahtzee"
-} else if (x[1]=x[4] | x[2]=x[5]) {
-    hand="4ofKind"
-} 
+} else if (x[1]==x[4] | x[2]==x[5]) {
+  hand="4ofKind"
+} else if ((x[1]==x[2] & x[3]==x[5]) | (x[1]==x[3] & x[4]==x[5])) {
+  hand="fullhouse"
+} else if (x[1] == x[3] | x[2]==x[4] | x[3]==x[5]) {
+  hand="3ofKind"
+} else if (length(unique(x)) == 5 & (x[5] - x[1] == 4)) {
+  hand="largestraight"
+} else if (length(unique(x)) == 4 & (x[5] - x[1] == 3)) {
+  hand="smallstraight"
+} else hand="Chance"
 
-...
-
- } else 
- hand="Chance"
+print(hand)
 ```
 
 The above code lays this out for Yahtzee and 4 of a kind. Find statements that work for the rest. Make sets of x and test them to make sure they work.
@@ -166,7 +175,34 @@ Small Straight    .1235
 
 Chance            .6326
 -------------------------------------------------------
+```{r}
+x <- matrix(, nrow=100000, ncol=5)
+for (i in 1:100000)
+  {
+  x[i,] <- sample(1:6, size=5, replace=T)
+}
+  
+for(i in 1:nrow(x)){
+  x[i,] <- bubblesort(x[i,])
+  
+if (x[i,1]==x[i,5]){
+  hand[i]="Yahtzee"
+} else if (x[i,1]==x[i,4] | x[i,2]==x[i,5]) {
+  hand[i]="4ofKind"
+} else if ((x[i,1]==x[i,2] & x[i,3]==x[i,5]) | (x[i,1]==x[i,3] & x[i,4]==x[i,5])) {
+  hand[i]="fullhouse"
+} else if (x[i,1] == x[i,3] | x[i,2]==x[i,4] | x[i,3]==x[i,5]) {
+  hand[i]="3ofKind"
+} else if (length(unique(x[i,])) == 5 & (x[i,5] - x[i,1] == 4)) {
+  hand[i]="largestraight"
+} else if (length(unique(x[i,])) == 4 & (x[i,5] - x[i,1] == 3)) {
+  hand[i]="smallstraight"
+} else hand[i]="Chance"
+}
 
+
+table(hand)/100000
+```
 
 
 ## Part II: PHP 2560 Only
